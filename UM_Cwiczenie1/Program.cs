@@ -47,7 +47,7 @@ while (true) {
     }
     double accuracy = (double)correctPredictions / testSet.Count;
     //Console.WriteLine("Accuracy: " + accuracy.ToS2tring("P"));
-    Console.WriteLine("Predictions:");
+    Console.WriteLine($"Predictions: for k={k}");
     foreach (var c in predictions.GroupBy(c => c)) {
         Console.WriteLine($"Predicted: {c.Key} - {predictions.Where(p => p.Equals(c.Key)).Count()} times");
     }
