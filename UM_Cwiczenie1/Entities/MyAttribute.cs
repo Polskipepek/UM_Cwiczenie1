@@ -1,13 +1,19 @@
-﻿namespace Cwiczenie1.Entities {
+﻿using UM_Cwiczenie1.Entities;
+
+namespace Cwiczenie1.Entities {
     public class MyAttribute {
         public string Name { get; set; }
         public object Value { get; set; }
 
+        public AttributeType AttributeType { get; set; }
+
         public MyAttribute() { }
-        public MyAttribute(string name, object value) {
+        public MyAttribute(string name, object value, AttributeType attributeType) {
             Name = name;
             Value = value;
+            AttributeType = attributeType;
         }
+
         override public string ToString() {
             return $"Name: {Name} \tValue: {Value}";
         }

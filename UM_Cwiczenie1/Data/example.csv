@@ -1,5 +1,5 @@
 ﻿decision;nominal;ordinal;numeric
-1;code A;excellent;45
-2;code B;fair;22
-3;code C;good;64
-4;code A;excellent;28
+1;code A;3;45
+2;code B;1;22
+3;code C;2;64
+4;code A;3;28

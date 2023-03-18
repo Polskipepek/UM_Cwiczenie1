@@ -1,6 +1,7 @@
 ﻿using Cwiczenie1.Entities;
 using Cwiczenie1.Entities.Mappers;
 using Cwiczenie1.KnnAlgorithm;
+using UM_Cwiczenie1.Entities;
 
 Console.WriteLine("Hello, Uczenie Maszynowe!");
 Console.WriteLine("Cwiczenie 1!");
@@ -96,7 +97,7 @@ static void NormalizeAttribute(IEnumerable<Entity> entities, string prop) {
         if (attribute != null && attribute.Value is double value) {
             double normalizedValue = (value - min) / (max - min);
             entity.Attributes.Remove(attribute);
-            entity.Attributes.Add(new MyAttribute(prop, normalizedValue));
+            entity.Attributes.Add(new MyAttribute(prop, normalizedValue,/*TODO*/ AttributeType.Nominalny));
         }
     }
 }
