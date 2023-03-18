@@ -75,9 +75,8 @@ static IEnumerable<Entity> GetData(ConsoleKey key) {
         var data = DataReader.ReadData(path, delimeter.KeyChar.ToString());
         return TableToEntitiesMapper.Map(data);
     } else if (key == ConsoleKey.D1) {
-        //var data = DataReader.ReadData($"{Environment.CurrentDirectory}/Data/fruits train.txt", ",");
-        //return TableToEntitiesMapper.Map(data);
-        return null;
+        var data = DataReader.ReadData($"{Environment.CurrentDirectory}/Data/example.csv", ";");
+        return TableToEntitiesMapper.Map(data);
     } else {
         return null;
     }
