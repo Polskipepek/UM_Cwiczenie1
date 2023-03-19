@@ -1,4 +1,4 @@
-Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;THAL;decision
+Age[NU];Sex[BI];CP[OR];TrestBPS[NU];FBS[BI];RESTECG[NO];EXANG[BI];SLOPE[NO];CA[OR];THAL[OR];decision
 63;1;angina;145;true;hyp;false;down;0.0;fix;buff
 67;1;asympt;160;false;hyp;true;flat;3.0;norm;sick
 67;1;asympt;120;false;hyp;true;flat;2.0;rev;sick

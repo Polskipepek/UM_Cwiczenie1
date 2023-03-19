@@ -2,26 +2,24 @@
 using Cwiczenie1.Entities.Mappers;
 using Cwiczenie1.KnnAlgorithm;
 using UM_Cwiczenie1.Entities;
+using UM_Cwiczenie1.Entities.Mappers;
 
 Console.WriteLine("Hello, Uczenie Maszynowe!");
 Console.WriteLine("Cwiczenie 1!");
 Console.WriteLine();
 
 while (true) {
-    Console.WriteLine("1. Example Data from presentation.");
-    Console.WriteLine("2. Red Wine Quality.");
-    Console.WriteLine("3. White Wine Quality.");
-    Console.WriteLine("4. Mushrooms.");
-    Console.WriteLine("0. Custom Data");
+    if (!File.Exists($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv"))
+    {
+        Console.WriteLine("File with data was not found.");
+        return;
+    }
 
-    var input = Console.ReadKey();
-    var data = GetData(input.Key);
-    if (data == null) throw new Exception("No data");
-    Console.Clear();
+    var data = TableToHearthEntitiesMapper.Map(DataReader.ReadData($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv", ";"));
 
-    int k = 5;
+    int k = -1;
     Console.WriteLine("Select k:");
-    while (!int.TryParse(Console.ReadLine(), out k)) {
+    while (!int.TryParse(Console.ReadLine(), out k) || k<1 || k>data.Count()) {
         Console.Clear();
         Console.WriteLine("You entered an invalid number");
         Console.Write("Enter number of k ");
@@ -29,15 +27,33 @@ while (true) {
     Console.Clear();
 
     var kNNInstance = new KnnAlgorithm();
-
+    /*
     foreach (var attribute in data.SelectMany(d => d.Attributes).Select(a => a.Name).Distinct()) {
         try {
             NormalizeAttribute(data, attribute);
         } catch (Exception) { }
     }
+    */
 
-    List<Entity> trainingSet = data.Take(data.Count() / 2).ToList();
-    List<Entity> testSet = data.Skip(data.Count() / 2).ToList();
+    int numRow = -1;
+    Console.WriteLine("Select number of test rows:");
+    while (!int.TryParse(Console.ReadLine(), out numRow) || numRow < 1 || numRow > data.Count())
+    {
+        Console.Clear();
+        Console.WriteLine("You entered an invalid number");
+        Console.Write("Enter number of test rows ");
+    }
+    Console.Clear();
+
+    List<Entity> testSet = data.ToList();
+    List<Entity> trainingSet = new List<Entity>();
+    Random rnd = new Random();
+    for (int i=0; i<numRow; i++)
+    {
+        int random = rnd.Next(testSet.Count);
+        trainingSet.Add(testSet[random]);
+        testSet.RemoveAt(random);
+    }
 
     int correctPredictions = 0;
     List<string> predictions = new();

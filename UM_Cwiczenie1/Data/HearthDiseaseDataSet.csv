@@ -1,4 +1,4 @@
-Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;decision
+Age[NU];Sex[BIS];CP[OR];TrestBPS[NU];FBS[BIA];RESTECG[NO];EXANG[BIA];SLOPE[NO];CA[OR];decision
 63;1;angina;145;true;hyp;false;down;0.0;buff
 67;1;asympt;160;false;hyp;true;flat;3.0;sick
 67;1;asympt;120;false;hyp;true;flat;2.0;sick
@@ -142,7 +142,6 @@ Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;decision
 35;1;asympt;126;false;hyp;true;up;0.0;sick
 45;0;abnang;112;false;norm;false;flat;0.0;buff
 70;1;notang;160;false;norm;true;flat;1.0;sick
-52;1;notang;138;false;norm;false;up;?;buff
 53;1;asympt;142;false;hyp;true;up;0.0;buff
 59;0;asympt;174;false;norm;true;flat;0.0;sick
 62;0;asympt;140;false;hyp;false;flat;0.0;buff
@@ -156,7 +155,6 @@ Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;decision
 56;0;asympt;134;false;hyp;true;flat;2.0;sick
 42;1;angina;148;false;hyp;false;up;2.0;buff
 59;1;angina;178;false;hyp;false;down;0.0;buff
-38;1;notang;138;false;norm;false;up;?;buff
 63;0;abnang;140;false;norm;false;up;2.0;buff
 42;1;notang;120;true;norm;false;down;0.0;buff
 66;1;abnang;160;false;norm;true;flat;3.0;sick
@@ -164,7 +162,6 @@ Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;decision
 69;1;notang;140;false;hyp;false;flat;3.0;sick
 50;1;notang;129;false;norm;false;up;0.0;buff
 51;1;asympt;140;false;norm;true;flat;3.0;sick
-43;1;asympt;132;true;hyp;true;flat;?;sick
 62;0;asympt;138;true;norm;false;flat;3.0;sick
 68;0;notang;120;false;hyp;false;flat;0.0;buff
 67;1;asympt;100;false;hyp;true;flat;2.0;sick
@@ -249,7 +246,6 @@ Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;decision
 35;1;abnang;122;false;norm;false;up;0.0;buff
 61;1;asympt;148;false;norm;false;up;1.0;sick
 58;1;asympt;114;false;abn;false;down;3.0;sick
-58;1;abnang;125;false;norm;false;flat;?;buff
 55;0;abnang;132;false;norm;false;up;0.0;buff
 44;1;asympt;120;false;norm;true;down;0.0;sick
 63;1;asympt;140;false;hyp;true;up;2.0;sick
@@ -261,7 +257,6 @@ Age;Sex;CP;TrestBPS;FBS;RESTECG;EXANG;SLOPE;CA;decision
 68;1;asympt;144;true;norm;false;flat;2.0;sick
 57;1;asympt;130;false;norm;true;flat;1.0;sick
 57;0;abnang;130;false;hyp;false;flat;1.0;sick
-38;1;notang;138;false;norm;false;up;?;buff
 58;0;asympt;170;true;hyp;true;flat;2.0;sick
 56;1;abnang;130;false;hyp;false;up;0.0;buff
 56;1;abnang;120;false;norm;false;down;0.0;buff

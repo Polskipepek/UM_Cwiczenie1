@@ -1,8 +1,10 @@
 ﻿namespace UM_Cwiczenie1.Entities {
     public enum AttributeType {
         Numeryczny,
-        Binarny,
+        BinarnySymetryczny,
+        BinarnyAsymetryczny,
         Nominalny,
-        Porzadkowy
+        Porzadkowy,
+        Brak
     }
 }
