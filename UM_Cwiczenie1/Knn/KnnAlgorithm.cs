@@ -1,7 +1,7 @@
 ﻿using Cwiczenie1.Entities;
 using UM_Cwiczenie1.Entities;
 
-namespace Cwiczenie1.KnnAlgorithm {
+namespace Cwiczenie1.Knn {
     internal class KnnAlgorithm {
         string[] _nominalNames;
         string[] _ordinalNames;
@@ -119,7 +119,6 @@ namespace Cwiczenie1.KnnAlgorithm {
                 }
             }
 
-            //[1] tutaj trzeba pomyśleć nad tym wzorem Euklidesa, kiedy są znormalizowane dane, bo....sqrt(1+1)>1 :/
             oridnalDistance = Math.Round(EuklidesDistance(oridnalValuesEntity1, oridnalValuesEntity2) / Math.Sqrt(oridnalValuesEntity1.Count), 3);
             ordinalOmega = oridnalValuesEntity1.Count;
         }
@@ -136,10 +135,12 @@ namespace Cwiczenie1.KnnAlgorithm {
 
         private double EuklidesDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
             if (valuesEntity1.Count != valuesEntity2.Count) return -1;
+
             double result = 0;
             for (int i = 0; i < valuesEntity1.Count; i++) {
                 result += Math.Pow(valuesEntity1[i] - valuesEntity2[i], 2);
             }
+
             return Math.Sqrt(result);
         }
 

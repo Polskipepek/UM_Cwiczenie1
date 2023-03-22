@@ -1,8 +1,10 @@
 ﻿using Cwiczenie1.Entities;
 using Cwiczenie1.Entities.Mappers;
-using Cwiczenie1.KnnAlgorithm;
+using Cwiczenie1.Knn;
+using System.Diagnostics;
 using UM_Cwiczenie1.Entities;
 using UM_Cwiczenie1.Entities.Mappers;
+using UM_Cwiczenie1.Knn;
 
 Console.WriteLine("Hello, Uczenie Maszynowe!");
 Console.WriteLine("Cwiczenie 1!");
@@ -52,13 +54,25 @@ while (true) {
     foreach (Entity testInstance in testSet) {
         var predictedClass = kNNInstance.Classify(trainingSet, testInstance, k);
         predictions.Add(predictedClass);
+
+        if (predictedClass == testInstance.DecisionAttribute) correctPredictions++;
     }
     double accuracy = (double)correctPredictions / testSet.Count;
-    //Console.WriteLine("Accuracy: " + accuracy.ToS2tring("P"));
+    Console.WriteLine($"Accuracy: {accuracy:P}%");
     Console.WriteLine($"Predictions: for k={k}");
     foreach (var c in predictions.GroupBy(c => c)) {
         Console.WriteLine($"Predicted: {c.Key} - {predictions.Where(p => p.Equals(c.Key)).Count()} times");
     }
+
+    var cm = ConfusionMatrix.Calculate(new string[2] { "buff", "sick" }, predictions.ToArray());
+
+    Console.ReadLine();
+    Stopwatch sw = new();
+    sw.Start();
+    var bestK = OptimalKfinder.FindBestK(trainingSet, testSet, 1, 30, out double bestAcc);
+    sw.Stop();
+    Console.WriteLine($"Best K is: {bestK} with {bestAcc:P}% - it took {sw.ElapsedMilliseconds / 1000} seconds to find. (1-30 range)");
+
     Console.ReadLine();
     Console.WriteLine();
 }
