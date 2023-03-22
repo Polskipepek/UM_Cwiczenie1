@@ -9,8 +9,7 @@ Console.WriteLine("Cwiczenie 1!");
 Console.WriteLine();
 
 while (true) {
-    if (!File.Exists($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv"))
-    {
+    if (!File.Exists($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv")) {
         Console.WriteLine("File with data was not found.");
         return;
     }
@@ -19,7 +18,7 @@ while (true) {
 
     int k = -1;
     Console.WriteLine("Select k:");
-    while (!int.TryParse(Console.ReadLine(), out k) || k<1 || k>data.Count()) {
+    while (!int.TryParse(Console.ReadLine(), out k) || k < 1 || k > data.Count()) {
         Console.Clear();
         Console.WriteLine("You entered an invalid number");
         Console.Write("Enter number of k ");
@@ -27,18 +26,11 @@ while (true) {
     Console.Clear();
 
     var kNNInstance = new KnnAlgorithm();
-    /*
-    foreach (var attribute in data.SelectMany(d => d.Attributes).Select(a => a.Name).Distinct()) {
-        try {
-            NormalizeAttribute(data, attribute);
-        } catch (Exception) { }
-    }
-    */
+
 
     int numRow = -1;
     Console.WriteLine("Select number of test rows:");
-    while (!int.TryParse(Console.ReadLine(), out numRow) || numRow < 1 || numRow > data.Count())
-    {
+    while (!int.TryParse(Console.ReadLine(), out numRow) || numRow < 1 || numRow > data.Count()) {
         Console.Clear();
         Console.WriteLine("You entered an invalid number");
         Console.Write("Enter number of test rows ");
@@ -46,10 +38,9 @@ while (true) {
     Console.Clear();
 
     List<Entity> testSet = data.ToList();
-    List<Entity> trainingSet = new List<Entity>();
-    Random rnd = new Random();
-    for (int i=0; i<numRow; i++)
-    {
+    List<Entity> trainingSet = new();
+    Random rnd = new();
+    for (int i = 0; i < numRow; i++) {
         int random = rnd.Next(testSet.Count);
         trainingSet.Add(testSet[random]);
         testSet.RemoveAt(random);
