@@ -1,13 +1,15 @@
 ﻿using Cwiczenie1.Entities;
 using Cwiczenie1.Knn;
+using System.Diagnostics;
 
 namespace UM_Cwiczenie1.Knn {
     public class OptimalKfinder {
 
-        public static int FindBestK(List<Entity> trainingSet, List<Entity> testInstance, int kMin, int kMax, out double bestAccuracy) {
+        public static int FindBestK(List<Entity> trainingSet, List<Entity> testInstance, int kMin, int kMax, out double bestAccuracy, out long elapsedMs) {
             int bestK = kMin;
             bestAccuracy = 0;
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             for (int k = kMin; k <= kMax; k++) {
                 double accuracy = CrossValidate(trainingSet, testInstance, k);
 
@@ -16,7 +18,8 @@ namespace UM_Cwiczenie1.Knn {
                     bestAccuracy = accuracy;
                 }
             }
-
+            sw.Stop();
+            elapsedMs = sw.ElapsedMilliseconds;
             return bestK;
         }
 
