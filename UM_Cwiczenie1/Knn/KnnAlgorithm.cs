@@ -134,7 +134,8 @@ namespace Cwiczenie1.Knn {
         }
 
         private double EuklidesDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
-            if (valuesEntity1.Count != valuesEntity2.Count) return -1;
+            if (valuesEntity1.Count != valuesEntity2.Count)
+                throw new ArgumentException("Vectors must have the same length");
 
             double result = 0;
             for (int i = 0; i < valuesEntity1.Count; i++) {
@@ -145,7 +146,8 @@ namespace Cwiczenie1.Knn {
         }
 
         private double ManhattanDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
-            if (valuesEntity1.Count != valuesEntity2.Count) return -1;
+            if (valuesEntity1.Count != valuesEntity2.Count)
+                throw new ArgumentException("Vectors must have the same length");
 
             double distance = 0;
             for (int k = 0; k < valuesEntity1.Count; k++) {
@@ -155,13 +157,31 @@ namespace Cwiczenie1.Knn {
         }
 
         private double MinkowskiDistance(List<double> valuesEntity1, List<double> valuesEntity2, NormaMinkowskiego p) {
-            double distance = 0;
+            if (valuesEntity1.Count != valuesEntity2.Count)
+                throw new ArgumentException("Vectors must have the same length"); double distance = 0;
+
             for (int k = 0; k < valuesEntity1.Count; k++) {
                 distance += Math.Pow(Math.Abs(valuesEntity1[k] - valuesEntity2[k]), (int)p);
             }
             distance = Math.Pow(distance, 1.0 / (int)p);
             return distance;
         }
+
+        private double ChebyshevDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
+            if (valuesEntity1.Count != valuesEntity2.Count)
+                throw new ArgumentException("Vectors must have the same length");
+
+            double maxDiff = 0.0;
+
+            for (int i = 0; i < valuesEntity1.Count; i++) {
+                double diff = Math.Abs(valuesEntity1[i] - valuesEntity2[i]);
+                if (diff > maxDiff)
+                    maxDiff = diff;
+            }
+
+            return maxDiff;
+        }
+
 
         private int LevenshteinDistance(string s, string t) {
             int m = s.Length;
