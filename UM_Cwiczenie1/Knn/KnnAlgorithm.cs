@@ -144,6 +144,25 @@ namespace Cwiczenie1.Knn {
             return Math.Sqrt(result);
         }
 
+        private double ManhattanDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
+            if (valuesEntity1.Count != valuesEntity2.Count) return -1;
+
+            double distance = 0;
+            for (int k = 0; k < valuesEntity1.Count; k++) {
+                distance += Math.Abs(valuesEntity1[k] - valuesEntity2[k]);
+            }
+            return distance;
+        }
+
+        private double MinkowskiDistance(List<double> valuesEntity1, List<double> valuesEntity2, NormaMinkowskiego p) {
+            double distance = 0;
+            for (int k = 0; k < valuesEntity1.Count; k++) {
+                distance += Math.Pow(Math.Abs(valuesEntity1[k] - valuesEntity2[k]), (int)p);
+            }
+            distance = Math.Pow(distance, 1.0 / (int)p);
+            return distance;
+        }
+
         private int LevenshteinDistance(string s, string t) {
             int m = s.Length;
             int n = t.Length;
