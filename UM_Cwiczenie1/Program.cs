@@ -7,14 +7,12 @@ Console.WriteLine("Hello, Uczenie Maszynowe!");
 Console.WriteLine("Cwiczenie 1!");
 Console.WriteLine();
 
-while (true) {
     if (!File.Exists($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv")) {
         Console.WriteLine("File with data was not found.");
         return;
     }
     var data = TableToHearthEntitiesMapper.Map(DataReader.ReadData($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv", ";"));
 
-    int k = GetInputNumber("Enter value for k", 1, data.Count());
     int numRow = GetInputNumber("Enter number of test rows ", 1, data.Count());
 
     List<Entity> testSet = data.ToList();
@@ -30,6 +28,8 @@ while (true) {
         testSet.RemoveAt(random);
     }
 
+while (true) {
+    int k = GetInputNumber("Enter value for k", 1, data.Count());
     foreach (Entity testInstance in testSet) {
         var predictedClass = kNNInstance.Classify(trainingSet, testInstance, k);
         predictions.Add(predictedClass);
@@ -53,7 +53,7 @@ while (true) {
 
 static void PrintBestK(int bestK, double bestAcc, long elapsedMs, int minK = 1, int maxK = 10) {
     Console.WriteLine();
-    Console.WriteLine($"Best K is: {bestK} with {bestAcc:P}% - it took {elapsedMs / 1000} seconds to find. (1-10 range)");
+    Console.WriteLine($"Best K is: {bestK} with {bestAcc:P}% - it took {elapsedMs / 1000} seconds to find. (1-{maxK} range)");
 }
 
 static double[,] CalculateConfusionMatrix(List<Entity> testSet, List<string> predictions, out string[] cmLabels) {
@@ -78,7 +78,7 @@ static void PrintConfusionMatrix(string[] cmLabels, double[,] cm) {
 static void PrintPredictions(int k, List<Entity> testSet, int correctPredictions, List<string> predictions) {
     double accuracy = (double)correctPredictions / testSet.Count;
     Console.WriteLine($"Predictions: for k={k}");
-    Console.WriteLine($"Accuracy: {accuracy:P}%");
+    Console.WriteLine($"Accuracy: {accuracy:P}");
     Console.WriteLine();
 
     foreach (var c in predictions.GroupBy(c => c)) {
