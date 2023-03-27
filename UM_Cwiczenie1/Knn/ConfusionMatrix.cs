@@ -1,14 +1,16 @@
-﻿namespace UM_Cwiczenie1.Knn {
+﻿using Cwiczenie1.Entities;
+
+namespace UM_Cwiczenie1.Knn {
     public static class ConfusionMatrix {
-        public static double[,] Calculate(string[] trueLabels, string[] predictedLabels) {
-            var labels = trueLabels.Distinct().OrderBy(l => l).ToArray();
+        public static double[,] Calculate(List<Entity> entities) {
+            var labels = entities.Select(e => e.DecisionAttribute).Distinct().ToArray();
             int m = labels.Length;
 
             var matrix = new double[m, m];
 
-            for (int i = 0; i < trueLabels.Length; i++) {
-                int actualIndex = Array.IndexOf(labels, trueLabels[i]);
-                int predictedIndex = Array.IndexOf(labels, predictedLabels[i]);
+            for (int i = 0; i < entities.Count; i++) {
+                int actualIndex = Array.IndexOf(labels, entities[i].DecisionAttribute);
+                int predictedIndex = Array.IndexOf(labels, entities[i].PredictedAttribute);
                 matrix[actualIndex, predictedIndex]++;
             }
 

@@ -21,7 +21,6 @@ while (true) {
     List<Entity> trainingSet = new();
     KnnAlgorithm kNNInstance = new();
     Random rnd = new();
-    List<string> predictions = new();
     int correctPredictions = 0;
 
     for (int i = 0; i < numRow; i++) {
@@ -32,18 +31,19 @@ while (true) {
 
     foreach (Entity testInstance in testSet) {
         var predictedClass = kNNInstance.Classify(trainingSet, testInstance, k);
-        predictions.Add(predictedClass);
+        testInstance.PredictedAttribute = predictedClass;
 
         if (predictedClass == testInstance.DecisionAttribute) correctPredictions++;
     }
 
-    PrintPredictions(k, testSet, correctPredictions, predictions);
+    PrintPredictions(k, testSet, correctPredictions, testSet.Select(e => e.PredictedAttribute).ToList());
 
-    var cm = CalculateConfusionMatrix(testSet, predictions, out string[] cmLabels);
+    var cm = CalculateConfusionMatrix(testSet, out string[] cmLabels);
     PrintConfusionMatrix(cmLabels, cm);
 
-    int maxK = GetInputNumber("Enter max K:", 1, data.Count(), false);
 
+    Console.WriteLine("Best K Finder");
+    int maxK = GetInputNumber("Enter max K:", 1, data.Count(), false);
     var bestK = OptimalKfinder.FindBestK(trainingSet, testSet, 1, maxK, out double bestAcc, out long elapsedMs);
     PrintBestK(bestK, bestAcc, elapsedMs, 1, maxK);
 
@@ -56,9 +56,9 @@ static void PrintBestK(int bestK, double bestAcc, long elapsedMs, int minK = 1, 
     Console.WriteLine($"Best K is: {bestK} with {bestAcc:P}% - it took {elapsedMs / 1000} seconds to find. (1-10 range)");
 }
 
-static double[,] CalculateConfusionMatrix(List<Entity> testSet, List<string> predictions, out string[] cmLabels) {
+static double[,] CalculateConfusionMatrix(List<Entity> testSet, out string[] cmLabels) {
     cmLabels = testSet.Select(x => x.DecisionAttribute).Distinct().ToArray();
-    return ConfusionMatrix.Calculate(cmLabels, predictions.ToArray());
+    return ConfusionMatrix.Calculate(testSet);
 }
 
 static void PrintConfusionMatrix(string[] cmLabels, double[,] cm) {
@@ -68,7 +68,7 @@ static void PrintConfusionMatrix(string[] cmLabels, double[,] cm) {
     for (int i = 0; i < cmLabels.Length; i++) {
         Console.Write($"{cmLabels[i]}:\t");
         for (int j = 0; j < cmLabels.Length; j++) {
-            Console.Write($"{cm[i, j]}\t");
+            Console.Write($"{cm[i, j]:P}\t");
         }
         Console.WriteLine();
     }
