@@ -1,5 +1,6 @@
 ﻿using Cwiczenie1.Entities;
 using UM_Cwiczenie1.Entities;
+using UM_Cwiczenie1.Knn;
 
 namespace Cwiczenie1.Knn {
     internal class KnnAlgorithm {
@@ -9,7 +10,7 @@ namespace Cwiczenie1.Knn {
         string[] _binarSNames;
         string[] _binarANames;
 
-        public string? Classify(IEnumerable<Entity> trainingSet, Entity testEntity, int k) {
+        public string? Classify(IEnumerable<Entity> trainingSet, Entity testEntity, int k, MeasureType measureType=MeasureType.Euklides, NormaMinkowskiego p=NormaMinkowskiego.Euklides) {
             List<Tuple<double, Entity>> distances = new();
 
             Entity dummyEntity = trainingSet.First();
@@ -21,7 +22,7 @@ namespace Cwiczenie1.Knn {
             _binarANames = dummyEntity.Attributes.Where(x => x.AttributeType == AttributeType.BinarnyAsymetryczny).Select(x => x.Name).ToArray();
 
             foreach (Entity trainingEntity in trainingSet) {
-                double distance = CalculateDistance(trainingEntity, testEntity);
+                double distance = CalculateDistance(trainingEntity, testEntity, measureType, p);
                 distances.Add(new Tuple<double, Entity>(distance, trainingEntity));
             }
 
@@ -39,18 +40,23 @@ namespace Cwiczenie1.Knn {
                 .FirstOrDefault();
         }
 
-        private double CalculateDistance(Entity entity1, Entity entity2) {
-            CalculateDistanceForNominalAttributes(entity1, entity2, out double nominalDistance, out int nominalOmega);
-            CalculateDistanceForOrdinalAttributes(entity1, entity2, out double oridnalDistance, out int ordinalOmega);
-            CalculateDistanceForNumericAttributes(entity1, entity2, out double numericDistance, out int numericOmega);
-            CalculateDistanceForBinarySymetrical(entity1, entity2, out double binarySDistance, out int binarySOmega);
-            CalculateDistanceForBinaryAsymetrical(entity1, entity2, out double binaryADistance, out int binaryAOmega);
+        private double CalculateDistance(Entity entity1, Entity entity2, MeasureType measureType, NormaMinkowskiego p) {
+            CalculateDistanceForNominalAttributes(entity1, entity2, out double nominalDistance, out int nominalDelta);
+            CalculateDistanceForOrdinalAttributes(entity1, entity2, out double oridnalDistance, out int ordinalDelta, measureType, p);
+            CalculateDistanceForNumericAttributes(entity1, entity2, out double numericDistance, out int numericDelta, measureType, p);
+            CalculateDistanceForBinarySymetrical(entity1, entity2, out double binarySDistance, out int binarySDelta);
+            CalculateDistanceForBinaryAsymetrical(entity1, entity2, out double binaryADistance, out int binaryADelta);
 
-            return ((nominalOmega * nominalDistance) + (ordinalOmega * oridnalDistance) + (numericOmega * numericDistance) + (binarySOmega * binarySDistance) + (binaryAOmega * binaryADistance))
-                / (double)(nominalOmega + ordinalOmega + numericOmega + binarySOmega + binaryAOmega);
+            if(numericDistance >1 || oridnalDistance > 1)
+            {
+                System.Diagnostics.Debug.WriteLine("One of distance wasn't normalized!");
+            }
+
+            return ((nominalDelta * nominalDistance) + (ordinalDelta * oridnalDistance) + (numericDelta * numericDistance) + (binarySDelta * binarySDistance) + (binaryADelta * binaryADistance))
+                / (double)(nominalDelta + ordinalDelta + numericDelta + binarySDelta + binaryADelta);
         }
 
-        private void CalculateDistanceForBinaryAsymetrical(Entity entity1, Entity entity2, out double binaryADistance, out int binaryAOmega) {
+        private void CalculateDistanceForBinaryAsymetrical(Entity entity1, Entity entity2, out double binaryADistance, out int binaryADelta) {
             int q2 = 0;
             int r2 = 0;
             int s2 = 0;
@@ -66,10 +72,10 @@ namespace Cwiczenie1.Knn {
             }
 
             binaryADistance = Math.Round((r2 + s2) / (double)((q2 + r2 + s2) == 0 ? 1 : (q2 + r2 + s2)), 3);
-            binaryAOmega = _binarANames.Length - binaryAEmpty;
+            binaryADelta = _binarANames.Length - binaryAEmpty;
         }
 
-        private void CalculateDistanceForBinarySymetrical(Entity entity1, Entity entity2, out double binarySDistance, out int binarySOmega) {
+        private void CalculateDistanceForBinarySymetrical(Entity entity1, Entity entity2, out double binarySDistance, out int binarySDelta) {
             int q1 = 0;
             int r1 = 0;
             int s1 = 0;
@@ -85,26 +91,24 @@ namespace Cwiczenie1.Knn {
             }
 
             binarySDistance = Math.Round((r1 + s1) / (double)(q1 + r1 + s1 + t1), 3);
-            binarySOmega = _binarSNames.Length;
+            binarySDelta = _binarSNames.Length;
         }
 
-        private void CalculateDistanceForNumericAttributes(Entity entity1, Entity entity2, out double numericDistance, out int numericOmega) {
+        private void CalculateDistanceForNumericAttributes(Entity entity1, Entity entity2, out double numericDistance, out int numericDelta, MeasureType measureType, NormaMinkowskiego p) {
             numericDistance = 0;
-            numericOmega = 0;
+            numericDelta = 0;
             foreach (string name in _numericNames) {
                 MyAttribute attr1 = entity1.Attributes.FirstOrDefault(x => x.Name == name);
                 MyAttribute attr2 = entity2.Attributes.FirstOrDefault(x => x.Name == name);
                 if (attr1 != null && attr2 != null) {
-                    numericDistance += EuklidesDistance(new List<double> { Convert.ToDouble(attr1.Value?.ToString().Replace(".", ",")) }, new List<double> { Convert.ToDouble(attr2.Value?.ToString().Replace(".", ",")) })
-                        / (attr1.Max - attr1.Min);
-                    numericOmega++;
+                    numericDistance += DistanceForMeasureType(new List<double> { (Convert.ToDouble(attr1.Value?.ToString().Replace(".", ",")) - attr1.Min) / (attr1.Max - attr1.Min) }, new List<double> { (Convert.ToDouble(attr2.Value?.ToString().Replace(".", ",")) - attr1.Min) / (attr1.Max - attr1.Min) }, measureType, p);
+                    numericDelta++;
                 }
             }
-            //podobnie jak w [1] nie wiem czy to dobrze, że dzielę tutaj (inaczej mogę wyjść powyżej wartości 1)
-            numericDistance = Math.Round(numericDistance / Math.Sqrt(numericOmega), 3);
+            numericDistance = Math.Round(numericDistance / DividerValueForMeasureType(numericDelta, measureType, p), 3);
         }
 
-        private void CalculateDistanceForOrdinalAttributes(Entity entity1, Entity entity2, out double oridnalDistance, out int ordinalOmega) {
+        private void CalculateDistanceForOrdinalAttributes(Entity entity1, Entity entity2, out double oridnalDistance, out int ordinalDelta, MeasureType measureType, NormaMinkowskiego p) {
             List<double> oridnalValuesEntity1 = new();
             List<double> oridnalValuesEntity2 = new();
 
@@ -119,18 +123,63 @@ namespace Cwiczenie1.Knn {
                 }
             }
 
-            oridnalDistance = Math.Round(EuklidesDistance(oridnalValuesEntity1, oridnalValuesEntity2) / Math.Sqrt(oridnalValuesEntity1.Count), 3);
-            ordinalOmega = oridnalValuesEntity1.Count;
+
+            oridnalDistance = Math.Round(DistanceForMeasureType(oridnalValuesEntity1, oridnalValuesEntity2, measureType, p) / DividerValueForMeasureType(oridnalValuesEntity1.Count, measureType, p), 3);
+            ordinalDelta = oridnalValuesEntity1.Count;
         }
 
-        private void CalculateDistanceForNominalAttributes(Entity entity1, Entity entity2, out double nominalDistance, out int nominalOmega) {
+        private void CalculateDistanceForNominalAttributes(Entity entity1, Entity entity2, out double nominalDistance, out int nominalDelta) {
             int nominalMatch = 0;
             foreach (string name in _nominalNames) {
                 if (entity1.Attributes.FirstOrDefault(x => x.Name == name)?.Value == entity2.Attributes.FirstOrDefault(x => x.Name == name)?.Value) nominalMatch++;
             }
 
             nominalDistance = Math.Round(Convert.ToDouble(_nominalNames.Length - nominalMatch) / Convert.ToDouble(_nominalNames.Length), 3);
-            nominalOmega = nominalMatch;
+            nominalDelta = nominalMatch;
+        }
+
+        private double DistanceForMeasureType(List<double> valuesEntity1, List<double> valuesEntity2, MeasureType measureType, NormaMinkowskiego p)
+        {
+            double distance = 0;
+            switch (measureType)
+            {
+                case MeasureType.Euklides:
+                    distance=EuklidesDistance(valuesEntity1, valuesEntity2);
+                    break;
+                case MeasureType.Manhattan:
+                    distance = ManhattanDistance(valuesEntity1, valuesEntity2);
+                    break;
+                case MeasureType.Minkowski:
+                    //?
+                    distance = MinkowskiDistance(valuesEntity1, valuesEntity2, NormaMinkowskiego.Euklides);
+                    break;
+                case MeasureType.Chebyshev:
+                    distance = ChebyshevDistance(valuesEntity1, valuesEntity2);
+                    break;
+            }
+            return distance;
+        }
+
+        private double DividerValueForMeasureType(double value, MeasureType measureType, NormaMinkowskiego p)
+        {
+            double divider = 0;
+            switch (measureType)
+            {
+                case MeasureType.Euklides:
+                    divider = Math.Sqrt(value);
+                    break;
+                case MeasureType.Manhattan:
+                    divider = Math.Abs(value);
+                    break;
+                case MeasureType.Minkowski:
+                    //?
+                    divider = Math.Pow(value, 1.0 / (double)p);
+                    break;
+                case MeasureType.Chebyshev:
+                    divider = Math.Abs(value);
+                    break;
+            }
+            return divider;
         }
 
         private double EuklidesDistance(List<double> valuesEntity1, List<double> valuesEntity2) {

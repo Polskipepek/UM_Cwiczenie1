@@ -7,67 +7,87 @@ Console.WriteLine("Hello, Uczenie Maszynowe!");
 Console.WriteLine("Cwiczenie 1!");
 Console.WriteLine();
 
-    if (!File.Exists($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv")) {
-        Console.WriteLine("File with data was not found.");
-        return;
-    }
-    var data = TableToHearthEntitiesMapper.Map(DataReader.ReadData($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv", ";"));
+if (!File.Exists($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv"))
+{
+    Console.WriteLine("File with data was not found.");
+    return;
+}
+var data = TableToHearthEntitiesMapper.Map(DataReader.ReadData($"{Environment.CurrentDirectory}/Data/HearthDiseaseDataSet.csv", ";"));
 
-    int numRow = GetInputNumber("Enter number of test rows ", 1, data.Count());
+int numRow = GetInputNumber("Enter number of test rows ", 1, data.Count());
 
-    List<Entity> testSet = data.ToList();
-    List<Entity> trainingSet = new();
-    KnnAlgorithm kNNInstance = new();
-    Random rnd = new();
+List<Entity> testSet = data.ToList();
+List<Entity> trainingSet = new();
+KnnAlgorithm kNNInstance = new();
+Random rnd = new();
+
+for (int i = 0; i < numRow; i++)
+{
+    int random = rnd.Next(testSet.Count);
+    trainingSet.Add(testSet[random]);
+    testSet.RemoveAt(random);
+}
+
+while (true)
+{
     int correctPredictions = 0;
+    int function = GetInputNumber("1. Custom K.\r\n2. Best K Finder.\r\nEnter function index: ", 1, 2, true);
 
-    for (int i = 0; i < numRow; i++) {
-        int random = rnd.Next(testSet.Count);
-        trainingSet.Add(testSet[random]);
-        testSet.RemoveAt(random);
+    switch (function)
+    {
+        case 1:
+            int k = GetInputNumber("Enter value for k", 1, data.Count());
+            int measureType = GetInputNumber("1. Euklides\r\n2. Manhattan\r\n3. Minkowski\r\n4. Chebyshev\r\nEnter measure type index:", 1, 4);
+            int minkowskiNorm = 2;
+            if(measureType == (int)MeasureType.Minkowski) minkowskiNorm = GetInputNumber("1. Manhattan\r\n2. Euklides\r\nEnter Minkowski norm index:", 1, 2);
+
+            foreach (Entity testInstance in testSet)
+            {
+                var predictedClass = kNNInstance.Classify(trainingSet, testInstance, k, (MeasureType)measureType, (UM_Cwiczenie1.Entities.NormaMinkowskiego)minkowskiNorm);
+                testInstance.PredictedAttribute = predictedClass;
+
+                if (predictedClass == testInstance.DecisionAttribute) correctPredictions++;
+            }
+
+            PrintPredictions(k, testSet, correctPredictions, testSet.Select(e => e.PredictedAttribute).ToList());
+
+            var cm = CalculateConfusionMatrix(testSet, out string[] cmLabels);
+            PrintConfusionMatrix(cmLabels, cm);
+            break;
+        case 2:
+            Console.WriteLine("Best K Finder");
+            int maxK = GetInputNumber("Enter max K:", 1, data.Count(), false);
+            var bestK = OptimalKfinder.FindBestK(trainingSet, testSet, 1, maxK, out double bestAcc, out long elapsedMs);
+            PrintBestK(bestK, bestAcc, elapsedMs, 1, maxK);
+            break;
     }
-
-while (true) {
-    int k = GetInputNumber("Enter value for k", 1, data.Count());
-    foreach (Entity testInstance in testSet) {
-        var predictedClass = kNNInstance.Classify(trainingSet, testInstance, k);
-        testInstance.PredictedAttribute = predictedClass;
-
-        if (predictedClass == testInstance.DecisionAttribute) correctPredictions++;
-    }
-
-    PrintPredictions(k, testSet, correctPredictions, testSet.Select(e => e.PredictedAttribute).ToList());
-
-    var cm = CalculateConfusionMatrix(testSet, out string[] cmLabels);
-    PrintConfusionMatrix(cmLabels, cm);
-
-
-    Console.WriteLine("Best K Finder");
-    int maxK = GetInputNumber("Enter max K:", 1, data.Count(), false);
-    var bestK = OptimalKfinder.FindBestK(trainingSet, testSet, 1, maxK, out double bestAcc, out long elapsedMs);
-    PrintBestK(bestK, bestAcc, elapsedMs, 1, maxK);
 
     Console.ReadLine();
     Console.WriteLine();
 }
 
-static void PrintBestK(int bestK, double bestAcc, long elapsedMs, int minK = 1, int maxK = 10) {
+static void PrintBestK(int bestK, double bestAcc, long elapsedMs, int minK = 1, int maxK = 10)
+{
     Console.WriteLine();
     Console.WriteLine($"Best K is: {bestK} with {bestAcc:P}% - it took {elapsedMs / 1000} seconds to find. (1-{maxK} range)");
 }
 
-static double[,] CalculateConfusionMatrix(List<Entity> testSet, out string[] cmLabels) {
+static double[,] CalculateConfusionMatrix(List<Entity> testSet, out string[] cmLabels)
+{
     cmLabels = testSet.Select(x => x.DecisionAttribute).Distinct().ToArray();
     return ConfusionMatrix.Calculate(testSet);
 }
 
-static void PrintConfusionMatrix(string[] cmLabels, double[,] cm) {
+static void PrintConfusionMatrix(string[] cmLabels, double[,] cm)
+{
     Console.WriteLine();
     Console.WriteLine("Confision Matrix");
     Console.WriteLine(string.Join("\t", cmLabels.Prepend("X")));
-    for (int i = 0; i < cmLabels.Length; i++) {
+    for (int i = 0; i < cmLabels.Length; i++)
+    {
         Console.Write($"{cmLabels[i]}:\t");
-        for (int j = 0; j < cmLabels.Length; j++) {
+        for (int j = 0; j < cmLabels.Length; j++)
+        {
             Console.Write($"{cm[i, j]:P}\t");
         }
         Console.WriteLine();
@@ -75,21 +95,25 @@ static void PrintConfusionMatrix(string[] cmLabels, double[,] cm) {
     Console.WriteLine();
 }
 
-static void PrintPredictions(int k, List<Entity> testSet, int correctPredictions, List<string> predictions) {
+static void PrintPredictions(int k, List<Entity> testSet, int correctPredictions, List<string> predictions)
+{
     double accuracy = (double)correctPredictions / testSet.Count;
     Console.WriteLine($"Predictions: for k={k}");
     Console.WriteLine($"Accuracy: {accuracy:P}");
     Console.WriteLine();
 
-    foreach (var c in predictions.GroupBy(c => c)) {
+    foreach (var c in predictions.GroupBy(c => c))
+    {
         Console.WriteLine($"Predicted: {c.Key} - {predictions.Where(p => p.Equals(c.Key)).Count()} times");
     }
 }
 
-static int GetInputNumber(string title, int min, int max, bool clearAfter = true) {
+static int GetInputNumber(string title, int min, int max, bool clearAfter = true)
+{
     int numRow = -1;
     Console.WriteLine(title);
-    while (!int.TryParse(Console.ReadLine(), out numRow) || numRow < min || numRow > max) {
+    while (!int.TryParse(Console.ReadLine(), out numRow) || numRow < min || numRow > max)
+    {
         Console.Clear();
         Console.WriteLine("You entered an invalid number");
         Console.Write(title);
