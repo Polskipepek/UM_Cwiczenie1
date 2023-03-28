@@ -4,13 +4,13 @@ using UM_Cwiczenie1.Knn;
 
 namespace Cwiczenie1.Knn {
     internal class KnnAlgorithm {
-        string[] _nominalNames;
-        string[] _ordinalNames;
-        string[] _numericNames;
-        string[] _binarSNames;
-        string[] _binarANames;
+        string[]? _nominalNames;
+        string[]? _ordinalNames;
+        string[]? _numericNames;
+        string[]? _binarSNames;
+        string[]? _binarANames;
 
-        public string? Classify(IEnumerable<Entity> trainingSet, Entity testEntity, int k, MeasureType measureType=MeasureType.Euklides, NormaMinkowskiego p=NormaMinkowskiego.Euklides) {
+        public string? Classify(IEnumerable<Entity> trainingSet, Entity testEntity, int k, MeasureType measureType = MeasureType.Euklides, NormaMinkowskiego p = NormaMinkowskiego.Euklides) {
             List<Tuple<double, Entity>> distances = new();
 
             Entity dummyEntity = trainingSet.First();
@@ -47,8 +47,7 @@ namespace Cwiczenie1.Knn {
             CalculateDistanceForBinarySymetrical(entity1, entity2, out double binarySDistance, out int binarySDelta);
             CalculateDistanceForBinaryAsymetrical(entity1, entity2, out double binaryADistance, out int binaryADelta);
 
-            if(numericDistance >1 || oridnalDistance > 1)
-            {
+            if (numericDistance > 1 || oridnalDistance > 1) {
                 System.Diagnostics.Debug.WriteLine("One of distance wasn't normalized!");
             }
 
@@ -61,7 +60,7 @@ namespace Cwiczenie1.Knn {
             int r2 = 0;
             int s2 = 0;
             int binaryAEmpty = 0;
-            foreach (string name in _binarANames) {
+            foreach (string name in _binarANames!) {
                 bool value1 = Convert.ToBoolean(entity1.Attributes.FirstOrDefault(x => x.Name == name)?.Value);
                 bool value2 = Convert.ToBoolean(entity2.Attributes.FirstOrDefault(x => x.Name == name)?.Value);
 
@@ -80,9 +79,9 @@ namespace Cwiczenie1.Knn {
             int r1 = 0;
             int s1 = 0;
             int t1 = 0;
-            foreach (string name in _binarSNames) {
-                bool value1 = Convert.ToBoolean(entity1.Attributes.FirstOrDefault(x => x.Name == name)?.Value?.ToString().Replace("1", "true").Replace("0", "false"));
-                bool value2 = Convert.ToBoolean(entity2.Attributes.FirstOrDefault(x => x.Name == name)?.Value?.ToString().Replace("1", "true").Replace("0", "false"));
+            foreach (string name in _binarSNames!) {
+                bool value1 = Convert.ToBoolean(entity1.Attributes.First(x => x.Name == name)?.Value?.ToString()?.Replace("1", "true").Replace("0", "false"));
+                bool value2 = Convert.ToBoolean(entity2.Attributes.First(x => x.Name == name)?.Value?.ToString()?.Replace("1", "true").Replace("0", "false"));
 
                 if (value1 && value2) q1++;
                 else if (value1 && !value2) r1++;
@@ -97,11 +96,11 @@ namespace Cwiczenie1.Knn {
         private void CalculateDistanceForNumericAttributes(Entity entity1, Entity entity2, out double numericDistance, out int numericDelta, MeasureType measureType, NormaMinkowskiego p) {
             numericDistance = 0;
             numericDelta = 0;
-            foreach (string name in _numericNames) {
-                MyAttribute attr1 = entity1.Attributes.FirstOrDefault(x => x.Name == name);
-                MyAttribute attr2 = entity2.Attributes.FirstOrDefault(x => x.Name == name);
+            foreach (string name in _numericNames!) {
+                MyAttribute attr1 = entity1.Attributes.First(x => x.Name == name);
+                MyAttribute attr2 = entity2.Attributes.First(x => x.Name == name);
                 if (attr1 != null && attr2 != null) {
-                    numericDistance += DistanceForMeasureType(new List<double> { (Convert.ToDouble(attr1.Value?.ToString().Replace(".", ",")) - attr1.Min) / (attr1.Max - attr1.Min) }, new List<double> { (Convert.ToDouble(attr2.Value?.ToString().Replace(".", ",")) - attr1.Min) / (attr1.Max - attr1.Min) }, measureType, p);
+                    numericDistance += DistanceForMeasureType(new List<double> { (Convert.ToDouble(attr1.Value?.ToString()?.Replace(".", ",")) - attr1.Min) / (attr1.Max - attr1.Min) }, new List<double> { (Convert.ToDouble(attr2.Value?.ToString()?.Replace(".", ",")) - attr1.Min) / (attr1.Max - attr1.Min) }, measureType, p);
                     numericDelta++;
                 }
             }
@@ -112,17 +111,14 @@ namespace Cwiczenie1.Knn {
             List<double> oridnalValuesEntity1 = new();
             List<double> oridnalValuesEntity2 = new();
 
-            //normalizacja
-            double oridnalDistance2 = 0;
-            foreach (string name in _ordinalNames) {
-                MyAttribute attr1 = entity1.Attributes.FirstOrDefault(x => x.Name == name);
-                MyAttribute attr2 = entity2.Attributes.FirstOrDefault(x => x.Name == name);
+            foreach (string name in _ordinalNames!) {
+                MyAttribute attr1 = entity1.Attributes.First(x => x.Name == name);
+                MyAttribute attr2 = entity2.Attributes.First(x => x.Name == name);
                 if (attr1 != null && attr2 != null) {
-                    oridnalValuesEntity1.Add((Convert.ToDouble(attr1.Value?.ToString().Replace(".", ",")) - 1) / (Convert.ToDouble(attr1.ValuesNum) - 1));
-                    oridnalValuesEntity2.Add((Convert.ToDouble(attr2.Value?.ToString().Replace(".", ",")) - 1) / (Convert.ToDouble(attr2.ValuesNum) - 1));
+                    oridnalValuesEntity1.Add((Convert.ToDouble(attr1.Value?.ToString()?.Replace(".", ",")) - 1) / (Convert.ToDouble(attr1.ValuesNum) - 1));
+                    oridnalValuesEntity2.Add((Convert.ToDouble(attr2.Value?.ToString()?.Replace(".", ",")) - 1) / (Convert.ToDouble(attr2.ValuesNum) - 1));
                 }
             }
-
 
             oridnalDistance = Math.Round(DistanceForMeasureType(oridnalValuesEntity1, oridnalValuesEntity2, measureType, p) / DividerValueForMeasureType(oridnalValuesEntity1.Count, measureType, p), 3);
             ordinalDelta = oridnalValuesEntity1.Count;
@@ -130,7 +126,7 @@ namespace Cwiczenie1.Knn {
 
         private void CalculateDistanceForNominalAttributes(Entity entity1, Entity entity2, out double nominalDistance, out int nominalDelta) {
             int nominalMatch = 0;
-            foreach (string name in _nominalNames) {
+            foreach (string name in _nominalNames!) {
                 if (entity1.Attributes.FirstOrDefault(x => x.Name == name)?.Value == entity2.Attributes.FirstOrDefault(x => x.Name == name)?.Value) nominalMatch++;
             }
 
@@ -138,20 +134,17 @@ namespace Cwiczenie1.Knn {
             nominalDelta = nominalMatch;
         }
 
-        private double DistanceForMeasureType(List<double> valuesEntity1, List<double> valuesEntity2, MeasureType measureType, NormaMinkowskiego p)
-        {
+        private static double DistanceForMeasureType(List<double> valuesEntity1, List<double> valuesEntity2, MeasureType measureType, NormaMinkowskiego p) {
             double distance = 0;
-            switch (measureType)
-            {
+            switch (measureType) {
                 case MeasureType.Euklides:
-                    distance=EuklidesDistance(valuesEntity1, valuesEntity2);
+                    distance = EuklidesDistance(valuesEntity1, valuesEntity2);
                     break;
                 case MeasureType.Manhattan:
                     distance = ManhattanDistance(valuesEntity1, valuesEntity2);
                     break;
                 case MeasureType.Minkowski:
-                    //?
-                    distance = MinkowskiDistance(valuesEntity1, valuesEntity2, NormaMinkowskiego.Euklides);
+                    distance = MinkowskiDistance(valuesEntity1, valuesEntity2, p);
                     break;
                 case MeasureType.Chebyshev:
                     distance = ChebyshevDistance(valuesEntity1, valuesEntity2);
@@ -160,11 +153,9 @@ namespace Cwiczenie1.Knn {
             return distance;
         }
 
-        private double DividerValueForMeasureType(double value, MeasureType measureType, NormaMinkowskiego p)
-        {
+        private static double DividerValueForMeasureType(double value, MeasureType measureType, NormaMinkowskiego p) {
             double divider = 0;
-            switch (measureType)
-            {
+            switch (measureType) {
                 case MeasureType.Euklides:
                     divider = Math.Sqrt(value);
                     break;
@@ -172,7 +163,6 @@ namespace Cwiczenie1.Knn {
                     divider = Math.Abs(value);
                     break;
                 case MeasureType.Minkowski:
-                    //?
                     divider = Math.Pow(value, 1.0 / (double)p);
                     break;
                 case MeasureType.Chebyshev:
@@ -182,7 +172,7 @@ namespace Cwiczenie1.Knn {
             return divider;
         }
 
-        private double EuklidesDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
+        private static double EuklidesDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
             if (valuesEntity1.Count != valuesEntity2.Count)
                 throw new ArgumentException("Vectors must have the same length");
 
@@ -194,7 +184,7 @@ namespace Cwiczenie1.Knn {
             return Math.Sqrt(result);
         }
 
-        private double ManhattanDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
+        private static double ManhattanDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
             if (valuesEntity1.Count != valuesEntity2.Count)
                 throw new ArgumentException("Vectors must have the same length");
 
@@ -205,7 +195,7 @@ namespace Cwiczenie1.Knn {
             return distance;
         }
 
-        private double MinkowskiDistance(List<double> valuesEntity1, List<double> valuesEntity2, NormaMinkowskiego p) {
+        private static double MinkowskiDistance(List<double> valuesEntity1, List<double> valuesEntity2, NormaMinkowskiego p) {
             if (valuesEntity1.Count != valuesEntity2.Count)
                 throw new ArgumentException("Vectors must have the same length"); double distance = 0;
 
@@ -216,7 +206,7 @@ namespace Cwiczenie1.Knn {
             return distance;
         }
 
-        private double ChebyshevDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
+        private static double ChebyshevDistance(List<double> valuesEntity1, List<double> valuesEntity2) {
             if (valuesEntity1.Count != valuesEntity2.Count)
                 throw new ArgumentException("Vectors must have the same length");
 
@@ -229,32 +219,6 @@ namespace Cwiczenie1.Knn {
             }
 
             return maxDiff;
-        }
-
-
-        private int LevenshteinDistance(string s, string t) {
-            int m = s.Length;
-            int n = t.Length;
-            int[,] d = new int[m + 1, n + 1];
-
-            for (int i = 0; i <= m; i++) {
-                d[i, 0] = i;
-            }
-
-            for (int j = 0; j <= n; j++) {
-                d[0, j] = j;
-            }
-
-            for (int j = 1; j <= n; j++) {
-                for (int i = 1; i <= m; i++) {
-                    if (s[i - 1] == t[j - 1]) {
-                        d[i, j] = d[i - 1, j - 1];
-                    } else {
-                        d[i, j] = Math.Min(Math.Min(d[i - 1, j], d[i, j - 1]), d[i - 1, j - 1]) + 1;
-                    }
-                }
-            }
-            return d[m, n];
         }
     }
 }
